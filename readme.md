@@ -4,6 +4,8 @@ Pixi-tilemap allows a developer to create tilemaps based on PIXI.js
 
 # Example Usage
 
+Completed demo: https://alanhollis.com/pixi-tilemap-tutorial/
+
 ## Creating a basic tile map
 
 ```javascript
