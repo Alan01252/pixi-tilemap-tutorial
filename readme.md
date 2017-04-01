@@ -6,7 +6,7 @@ Pixi-tilemap allows a developer to create tilemaps based on PIXI.js
 
 ## Creating a basic tile map
 
-```
+```javascript
 <!doctype html>
 <html>
 <head>
@@ -49,7 +49,7 @@ Pixi-tilemap allows a developer to create tilemaps based on PIXI.js
 
 ## Pivoting the tile map around a player to give a movement effect
 
-```
+```javascript
 <!doctype html>
 <html>
 <head>
@@ -136,7 +136,8 @@ Pixi-tilemap allows a developer to create tilemaps based on PIXI.js
 
 Change the draw tiles function and the gampe loop function as follows
 
-```
+
+```javascript
     function drawTiles() {
         var numberOfTiles = parseInt(resolutionX / tileSizeX) + 10;
 
@@ -169,7 +170,7 @@ Change the draw tiles function and the gampe loop function as follows
 
 ## Add another image to the tile map
 
-```
+```javascript
 
     function drawTiles() {
         var numberOfTiles = parseInt(resolutionX / tileSizeX) + 10;
@@ -205,6 +206,9 @@ Change the draw tiles function and the gampe loop function as follows
 ```
 
 ## Add animation to the building
+
+
+```javascript
     var tick = new Date().getTime();
     var tileAnim = 0;
     var tileAnimationTick = 0;
@@ -233,10 +237,11 @@ Change the draw tiles function and the gampe loop function as follows
         }
         requestAnimationFrame(gameLoop);
     }
+```
     
 ## Complete code with stats
 
-```
+```javascript
 <!doctype html>
 <html>
 <head>
