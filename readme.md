@@ -1,6 +1,6 @@
 # About
 
-Pixi-tilemap allows a developer to create tilemaps based on PIXI.js
+Pixi-tilemap allows a developer to create tilemaps based on PIXI.js and https://github.com/pixijs/pixi-tilemap
 
 # Example Usage
 
