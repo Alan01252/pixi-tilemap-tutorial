@@ -12,8 +12,8 @@ Completed demo: https://alanhollis.com/pixi-tilemap-tutorial/
 <!doctype html>
 <html>
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.4.3/pixi.min.js"></script>
-    <script src="https://cdn.rawgit.com/pixijs/pixi-tilemap/master/bin/pixi-tilemap.js"></script>
+    <script src="https://pixijs.download/release/pixi.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@pixi/tilemap@latest/dist/pixi-tilemap.umd.js"></script>
 </head>
 <body>
 
@@ -79,12 +79,15 @@ Completed demo: https://alanhollis.com/pixi-tilemap-tutorial/
         y: 0
     };
 
-    PIXI.loader
-            .add([
-                "imgs/imgGround.png",
-                "imgs/imgTanks.png"
-            ])
-            .load(setup);
+
+    const loader = PIXI.Loader.shared;
+    loader
+        .add([
+            "imgs/imgGround.png",
+            "imgs/imgTanks.png",
+            "imgs/imgBuildings.png"
+        ])
+        .load(setup);
 
     function setup() {
 
