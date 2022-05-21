@@ -1,36 +1,39 @@
 <!doctype html>
 <html>
+
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.6.2/pixi.min.js"></script>
-    <script src="./lib/pixi-tilemap.js"></script>
+    <script src="https://pixijs.download/release/pixi.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@pixi/tilemap@latest/dist/pixi-tilemap.umd.js"></script>
     <script src="//rawgit.com/mrdoob/stats.js/master/build/stats.min.js"></script>
 </head>
+
 <body>
 
-<script>
-    var resolutionX = 800;
-    var resolutionY = 600;
-    var tileSizeX = 128;
-    var tileSizeY = 128;
+    <script>
+        var resolutionX = 800;
+        var resolutionY = 600;
+        var tileSizeX = 128;
+        var tileSizeY = 128;
 
-    var stats = new Stats();
-    stats.showPanel(0);
-    document.body.appendChild(stats.dom);
+        var stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
 
-    var app = new PIXI.Application(resolutionX, resolutionY);
-    document.body.appendChild(app.view);
+        var app = new PIXI.Application(resolutionX, resolutionY);
+        document.body.appendChild(app.view);
 
-    var groundTiles;
-    var playerTankSprite;
-    var playerOffsetX = (resolutionX / 2 - 24);
-    var playerOffsetY = (resolutionY / 2 - 24);
+        var groundTiles;
+        var playerTankSprite;
+        var playerOffsetX = (resolutionX / 2 - 24);
+        var playerOffsetY = (resolutionY / 2 - 24);
 
-    var player = {
-        x: 0,
-        y: 0
-    };
+        var player = {
+            x: 0,
+            y: 0
+        };
 
-    PIXI.loader
+        const loader = PIXI.Loader.shared;
+        loader
             .add([
                 "imgs/imgGround.png",
                 "imgs/imgTanks.png",
@@ -38,94 +41,95 @@
             ])
             .load(setup);
 
-    function setup() {
+        function setup() {
 
-        // Create our tile map based on the ground texture
-        groundTiles = new PIXI.tilemap.CompositeRectTileLayer(0, PIXI.utils.TextureCache['imgs/imgGround.png']);
-        drawTiles();
+            // Create our tile map based on the ground texture
+            groundTiles = new PIXI.tilemap.CompositeRectTileLayer(0, PIXI.utils.TextureCache['imgs/imgGround.png']);
+            drawTiles();
 
-        app.stage.addChild(groundTiles);
+            app.stage.addChild(groundTiles);
 
-        // Place a tank in the middle of the texture the tank sprite never moves
-        // Instead we move the tile map around the player in out game loop
-        var tankTexture = new PIXI.Texture(
+            // Place a tank in the middle of the texture the tank sprite never moves
+            // Instead we move the tile map around the player in out game loop
+            var tankTexture = new PIXI.Texture(
                 PIXI.utils.TextureCache['imgs/imgTanks.png'],
                 new PIXI.Rectangle(0 * 48, 0, 48, 48)
-        );
+            );
 
-        playerTankSprite = new PIXI.Sprite(tankTexture);
-        playerTankSprite.x = playerOffsetX;
-        playerTankSprite.y = playerOffsetY;
-        app.stage.addChild(playerTankSprite);
+            playerTankSprite = new PIXI.Sprite(tankTexture);
+            playerTankSprite.x = playerOffsetX;
+            playerTankSprite.y = playerOffsetY;
+            app.stage.addChild(playerTankSprite);
 
-        gameLoop();
-    }
-
-    function drawTiles() {
-        var numberOfTiles = parseInt(resolutionX / tileSizeX) + 10;
-
-        // We need to calculate this in order to prevent the tile looking "jumpy" when it's redrawn
-
-        var groundOffsetX = player.x % 128; // Number of tank tiles on x axis
-        var groundOffsetY = player.y % 128; // Number of tank tiles on y axis
-
-        for (var i = -numberOfTiles; i <= numberOfTiles; i++) {
-            for (var j = -numberOfTiles; j <= numberOfTiles; j++) {
-                groundTiles.addFrame('imgs/imgGround.png', i * tileSizeX, j * tileSizeY);
-            }
+            gameLoop();
         }
 
+        function drawTiles() {
+            var numberOfTiles = parseInt(resolutionX / tileSizeX) + 10;
 
-        // We'll use these later to animate the building
-        var animateX = 1;
-        var animateY = 0;
+            // We need to calculate this in order to prevent the tile looking "jumpy" when it's redrawn
 
-        /**
-         * We'll draw the building off the players viewport to start to give it the impression we're driving past
-         * @type {number}
-         */
-        var buildingTexture = new PIXI.Texture(
+            var groundOffsetX = player.x % 128; // Number of tank tiles on x axis
+            var groundOffsetY = player.y % 128; // Number of tank tiles on y axis
+
+            for (var i = -numberOfTiles; i <= numberOfTiles; i++) {
+                for (var j = -numberOfTiles; j <= numberOfTiles; j++) {
+                    groundTiles.addFrame('imgs/imgGround.png', i * tileSizeX, j * tileSizeY);
+                }
+            }
+
+
+            // We'll use these later to animate the building
+            var animateX = 1;
+            var animateY = 0;
+
+            /**
+             * We'll draw the building off the players viewport to start to give it the impression we're driving past
+             * @type {number}
+             */
+            var buildingTexture = new PIXI.Texture(
                 PIXI.utils.TextureCache['imgs/imgBuildings.png'],
                 new PIXI.Rectangle(0, 0, 144, 144, 144)
-        );
-        groundTiles.addFrame(buildingTexture, (2 * 128), (4 * 128) * -1, animateX, animateY);
+            );
+            groundTiles.addFrame(buildingTexture, (2 * 128), (4 * 128) * -1, animateX, animateY);
 
-        groundTiles.position.set(playerOffsetX + player.x - groundOffsetX, playerOffsetY + player.y - groundOffsetY);
-    }
-
-    var tick = new Date().getTime();
-    var tileAnim = 0;
-    var tileAnimationTick = 0;
-    function gameLoop() {
-
-
-        stats.begin();
-
-        tick = new Date().getTime();
-        if (player.y % (10 * tileSizeY ) === -0) {
-            console.log("redrawing");
-            drawTiles();
+            groundTiles.position.set(playerOffsetX + player.x - groundOffsetX, playerOffsetY + player.y - groundOffsetY);
         }
 
-        // Make it look like the tank is driving forwards by moving the tiles
-        player.y -= 4;
-        groundTiles.pivot.set(player.x, player.y);
+        var tick = new Date().getTime();
+        var tileAnim = 0;
+        var tileAnimationTick = 0;
+        function gameLoop() {
 
-        app.renderer.plugins.tilemap.tileAnim[0] = tileAnim * 144;
-        if (tick > tileAnimationTick) {
-            tileAnimationTick = tick + 300;
 
-            tileAnim = tileAnim + 1;
-            if (tileAnim >= 3) {
+            stats.begin();
 
-                tileAnim = 0;
+            tick = new Date().getTime();
+            if (player.y % (10 * tileSizeY) === -0) {
+                console.log("redrawing");
+                drawTiles();
             }
+
+            // Make it look like the tank is driving forwards by moving the tiles
+            player.y -= 4;
+            groundTiles.pivot.set(player.x, player.y);
+
+            app.renderer.plugins.tilemap.tileAnim[0] = tileAnim * 144;
+            if (tick > tileAnimationTick) {
+                tileAnimationTick = tick + 300;
+
+                tileAnim = tileAnim + 1;
+                if (tileAnim >= 3) {
+
+                    tileAnim = 0;
+                }
+            }
+
+            stats.end();
+            requestAnimationFrame(gameLoop);
         }
 
-        stats.end();
-        requestAnimationFrame(gameLoop);
-    }
-
-</script>
+    </script>
 </body>
+
 </html>
